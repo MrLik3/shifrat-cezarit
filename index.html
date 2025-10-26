@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shifrat e Cezarit – Web</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #111831;
+      --panel-2: #0f152b;
+      --text: #e7ecff;
+      --muted: #a7b1d6;
+      --accent: #5b8cff;
+      --accent-2: #7bdcff;
+      --ring: rgba(123, 220, 255, .35);
+      --danger: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text); background: radial-gradient(1200px 600px at 10% 10%, #0f1b3a 0%, #0b1020 40%, #0b1020 100%);
+      min-height: 100vh; display: grid; place-items: start center; padding: 24px;
+    }
+    .app { width: min(1100px, 100%); }
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    h1 { font-size: clamp(20px, 2.2vw, 28px); margin: 0; letter-spacing: .3px; }
+    .card { background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%); border: 1px solid rgba(255,255,255,.06); border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04); }
+    .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    @media (min-width: 980px) { .grid { grid-template-columns: 1.2fr .8fr; } }
+
+    label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: block; margin-bottom: 6px; }
+    textarea, input[type="number"], select {
+      width: 100%; color: var(--text); background: #0c1330; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px 14px; outline: none; font: inherit;
+      box-shadow: 0 0 0 0px transparent; transition: box-shadow .15s, border-color .15s, transform .02s;
+    }
+    textarea { min-height: 220px; resize: vertical; }
+    textarea:focus, input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+
+    .controls { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .controls-rows { display: grid; gap: 12px; grid-template-columns: 1fr 1fr 1fr; }
+    .row { display: grid; gap: 8px; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge { font-size: 12px; background: #0a122b; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; padding: 6px 10px; color: var(--muted); }
+
+    .btns { display: flex; flex-wrap: wrap; gap: 10px; }
+    button { appearance: none; border: 1px solid rgba(255,255,255,.1); background: #0d1b3f; color: var(--text); padding: 10px 14px; border-radius: 12px; font-weight: 600; cursor: pointer;
+      transition: transform .05s ease, border-color .15s, background .15s; }
+    button:hover { border-color: rgba(123,220,255,.45); }
+    button:active { transform: translateY(1px); }
+    .primary { background: linear-gradient(180deg, var(--accent) 0%, #2f5eff 100%); border-color: rgba(255,255,255,.15); }
+    .danger { background: linear-gradient(180deg, #ff8585 0%, var(--danger) 100%); }
+    .ghost { background: #0a122b; }
+
+    .toggle {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: #0a122b; border: 1px solid rgba(255,255,255,.08);
+      user-select: none; cursor: pointer; font-size: 13px; color: var(--muted);
+    }
+    .toggle input { display: none; }
+    .toggle .dot { height: 18px; width: 34px; border-radius: 999px; background: #071029; border: 1px solid rgba(255,255,255,.08); position: relative; }
+    .toggle .dot::after { content: ""; position: absolute; inset: 2px auto 2px 2px; height: 12px; width: 12px; border-radius: 999px; background: var(--accent-2); transition: left .18s ease; }
+    .toggle input:checked + .dot::after { left: 18px; }
+
+    .footer { color: var(--muted); font-size: 12px; margin-top: 12px; text-align: right; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1>Shifrat e Cezarit – Encrypt / Decrypt (Alfabet + Shifra)</h1>
+      <div class="badges">
+        <span class="badge">Case-preserving</span>
+        <span class="badge">Modulo 26/10</span>
+        <span class="badge">Ç/Ë opsionale</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="row">
+          <label for="input">Hyrja</label>
+          <textarea id="input" placeholder="Shkruaj tekstin këtu ose përdor Mostrën"></textarea>
+        </div>
+
+        <div class="controls" style="margin: 12px 0 8px;">
+          <div class="row">
+            <label for="mode">Moda</label>
+            <select id="mode" aria-label="Zgjidh modën">
+              <option value="encrypt">Encrypt</option>
+              <option value="decrypt">Decrypt</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="shift">Çelsi</label>
+            <input id="shift" type="number" value="3" step="1" class="mono" />
+          </div>
+        </div>
+
+        <div class="controls-rows" style="margin-bottom:12px;">
+          <label class="toggle" title="Përfshi shifrat 0–9">
+            <input id="digits" type="checkbox" />
+            <span class="dot"></span>
+            0–9
+          </label>
+          <label class="toggle" title="Përfshi Ç/Ë dhe ç/ë">
+            <input id="albanian" type="checkbox" />
+            <span class="dot"></span>
+            Ç/Ë
+          </label>
+          <label class="toggle" title="Auto-apliko gjatë shkrimit">
+            <input id="live" type="checkbox" checked />
+            <span class="dot"></span>
+            Live
+          </label>
+        </div>
+
+        <div class="btns" style="margin-bottom: 12px;">
+          <button class="primary" id="run">Apliko</button>
+          <button id="swap" class="ghost" title="Këmbe Hyrjen me Daljen">Ndrysho</button>
+          <button id="copyOut" class="ghost">Kopjo Daljen</button>
+          <button id="sample" class="ghost">Shëmbull</button>
+          <button id="clear" class="danger">Pastro</button>
+          <button id="downloadTxt" class="ghost" title="Shkarko daljen si .txt">Shkarko .txt</button>
+        </div>
+
+        <div class="row">
+          <label for="output">Dalja</label>
+          <textarea id="output" placeholder="Rezultati shfaqet këtu" readonly></textarea>
+        </div>
+
+        <div class="footer">Implementim: <span class="mono">A–Z / a–z</span> (mod 26), <span class="mono">0–9</span> (mod 10, opsionale), <span class="mono">Ç/Ë/ç/ë</span> (opsionale). Shenjat e tjera mbeten të pandryshuara.</div>
+      </section>
+
+      <aside class="card">
+        <h2 style="margin-top:4px; font-size:18px;">Si funksionon</h2>
+        <ol style="line-height:1.65; color: var(--muted);">
+          <li>Zgjidh <b>modën</b> Encrypt ose Decrypt.</li>
+          <li>Cakto <b>shift</b> (mund të jetë edhe negativ).</li>
+          <li>Aktivo <b>0–9</b> dhe/ose <b>Ç/Ë</b> sipas nevojës.</li>
+          <li>Shtyp <b>Apliko</b> ose lë <b>Live</b> të aktivizuar për rezultat në kohë reale.</li>
+        </ol>
+        <p style="color: var(--muted);">Ky mjet ruan rastin (shkronjat e mëdha/vogla) dhe lë të pandryshuara karakteret që nuk janë pjesë e alfabeteve të përzgjedhura.</p>
+        <hr style="border-color: rgba(255,255,255,.08); margin: 16px 0;">
+        <details>
+          <summary class="mono" style="cursor:pointer;">Pseudokod</summary>
+          <pre style="white-space:pre-wrap; color: var(--muted);">build_alphabets(digits, albanian)
+  upper = "A..Z" [+ "ÇË"?]
+  lower = "a..z" [+ "çë"?]
+  digit = "0..9" (opsionale)
+
+shift_char(ch, s)
+  nëse ch ∈ upper → rrotullo modulo |upper|
+  nëse ch ∈ lower → rrotullo modulo |lower|
+  nëse ch ∈ digit → rrotullo modulo 10
+  ndryshe → ch
+
+transform(text, shift, mode)
+  eff = shift  (encrypt)
+  eff = -shift (decrypt)
+  kthe bashkimin e shift_char për çdo karakter
+</pre>
+        </details>
+      </aside>
+    </div>
+  </div>
+
+  <script src="shifer.js"></script>
+</body>
+</html>
