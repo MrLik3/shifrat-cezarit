@@ -10,7 +10,7 @@ me opsione për shifrat 0–9 dhe Ç/Ë.
 
 ## Struktura
 - `index.html` – UI + stilimi
-- `cipher.js` – Logjika e cipher-it dhe lidhja me UI
+- `shifer.js` – Logjika e cipher-it dhe lidhja me UI
 
 ## Shënime
 - Ruhet rasti i shkronjave; karakteret jashtë alfabeteve të përzgjedhura nuk preken.
